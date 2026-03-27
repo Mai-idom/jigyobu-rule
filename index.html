@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>事業部ルール</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background: #f0f2f5;
+      color: #333;
+    }
+    header {
+      background: #1F4E79;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    header h1 { font-size: 22px; letter-spacing: 2px; }
+    header span { font-size: 13px; opacity: 0.7; }
+    main { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+    .section-title {
+      font-size: 14px;
+      color: #888;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      border-left: 4px solid #1F4E79;
+      padding-left: 10px;
+    }
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+    .nav-card {
+      background: white;
+      border-radius: 6px;
+      padding: 18px;
+      text-decoration: none;
+      color: #333;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      border-top: 4px solid #1F4E79;
+      transition: transform 0.15s, box-shadow 0.15s;
+      height: 90px;
+    }
+    .nav-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .nav-card .card-title { font-size: 15px; font-weight: bold; margin-bottom: 6px; }
+    .nav-card .card-desc { font-size: 12px; color: #888; }
+    .table-wrap {
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead th {
+      background: #1F4E79;
+      color: white;
+      padding: 12px 16px;
+      text-align: center;
+      font-weight: normal;
+      letter-spacing: 1px;
+    }
+    tbody tr:nth-child(even) { background: #f9f9f9; }
+    tbody tr:hover { background: #EBF3FB; }
+    tbody td {
+      padding: 10px 16px;
+      border-bottom: 1px solid #eee;
+    }
+    tbody td a {
+      color: #1F4E79;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    tbody td a:hover { text-decoration: underline; }
+    .loading { text-align: center; padding: 40px; color: #888; }
+    footer { text-align: center; padding: 30px; font-size: 12px; color: #aaa; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>事業部ルール</h1>
+    <span id="updated">読み込み中...</span>
+  </header>
+
+  <main>
+    <p class="section-title">メニュー</p>
+    <div class="nav-grid">
+      <a href="definition.html" class="nav-card">
+        <div class="card-title">📖 定義</div>
+        <div class="card-desc">用語・定義一覧</div>
+      </a>
+      <a href="flow.html" class="nav-card">
+        <div class="card-title">📋 フロー</div>
+        <div class="card-desc">業務フロー</div>
+      </a>
+      <a href="flow-detail.html" class="nav-card">
+        <div class="card-title">📄 フロー詳細</div>
+        <div class="card-desc">各ステップの詳細</div>
+      </a>
+      <a href="calendar.html" class="nav-card">
+        <div class="card-title">📅 カレンダー</div>
+        <div class="card-desc">カレンダー対応ルール、登録方法</div>
+      </a>
+      <a href="mail.html" class="nav-card">
+        <div class="card-title">✉️ メール</div>
+        <div class="card-desc">メール対応ルール、テンプレート</div>
+      </a>
+      <a href="line.html" class="nav-card">
+        <div class="card-title">💬 LINE</div>
+        <div class="card-desc">LINE対応ルール、テンプレート</div>
+      </a>
+      <a href="members.html" class="nav-card">
+        <div class="card-title">👥 メンバーズ</div>
+        <div class="card-desc">メンバーズ対応ルール、テンプレート</div>
+      </a>
+      <a href="other.html" class="nav-card">
+        <div class="card-title">📁 その他</div>
+        <div class="card-desc">その他ルール</div>
+      </a>
+      <a href="other-bunpai.html" class="nav-card">
+        <div class="card-title">📊 配分ルール</div>
+        <div class="card-desc">その他_配分ルール</div>
+      </a>
+      <a href="daily.html" class="nav-card">
+        <div class="card-title">📆 日次</div>
+        <div class="card-desc">日次業務</div>
+      </a>
+      <a href="weekly.html" class="nav-card">
+        <div class="card-title">📆 週次</div>
+        <div class="card-desc">週次業務</div>
+      </a>
+      <a href="monthly.html" class="nav-card">
+        <div class="card-title">📆 月次</div>
+        <div class="card-desc">月次業務</div>
+      </a>
+      <a href="company-rules.html" class="nav-card">
+        <div class="card-title">🏢 全社ルール</div>
+        <div class="card-desc">全社共通ルール</div>
+      </a>
+      <a href="qa.html" class="nav-card">
+        <div class="card-title">❓ Q&amp;A</div>
+        <div class="card-desc">よくある質問</div>
+      </a>
+      <a href="history-rule.html" class="nav-card">
+        <div class="card-title">🕒 更新履歴（ルール）</div>
+        <div class="card-desc">更新履歴のルール</div>
+      </a>
+      <a href="history.html" class="nav-card">
+        <div class="card-title">🕒 更新履歴</div>
+        <div class="card-desc">更新履歴</div>
+      </a>
+    </div>
+
+    <p class="section-title">目次</p>
+    <div class="table-wrap">
+      <div id="index-table" class="loading">データを読み込み中...</div>
+    </div>
+  </main>
+
+  <footer>事業部ルール &copy; 2024</footer>
+
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script>
+    // 目次項目のリンク対応表
+    const pageLinks = {
+      // フロー詳細系
+      "1-アポ": "flow.html#" + encodeURIComponent("1-アポ"),
+      "2-新規": "flow.html#" + encodeURIComponent("2-新規"),
+      "3-提案": "flow.html#" + encodeURIComponent("3-提案"),
+      "4-ヨミ": "flow.html#" + encodeURIComponent("4-ヨミ"),
+      "5-受注": "flow.html#" + encodeURIComponent("5-受注"),
+      "詳細":      "flow-detail.html",
+      // カレンダー系
+      "カレンダー入力ルール":                    "calendar.html#" + encodeURIComponent("カレンダー入力ルール"),
+      "カレンダー登録（アポ取得時）":            "calendar.html#" + encodeURIComponent("カレンダー登録（アポ取得時）"),
+      "カレンダー登録（新規商談後）":            "calendar.html#" + encodeURIComponent("カレンダー登録（新規商談後）"),
+      "カレンダー登録（提案後）":               "calendar.html#" + encodeURIComponent("カレンダー登録（提案後）"),
+      "カレンダー登録（ヨミ商談後）":            "calendar.html#" + encodeURIComponent("カレンダー登録（ヨミ商談後）"),
+      "カレンダー結果登録（新規→提案）":         "calendar.html#" + encodeURIComponent("カレンダー結果登録（新規→提案）"),
+      "カレンダー結果登録（提案→ヨミ）":         "calendar.html#" + encodeURIComponent("カレンダー結果登録（提案→ヨミ）"),
+      "カレンダー結果登録（ヨミ→ヨミ）":         "calendar.html#" + encodeURIComponent("カレンダー結果登録（ヨミ→ヨミ）"),
+      "カレンダー結果登録（新規→受注）":         "calendar.html#" + encodeURIComponent("カレンダー結果登録（新規→受注）"),
+      "カレンダー結果登録（提案→受注）":         "calendar.html#" + encodeURIComponent("カレンダー結果登録（提案→受注）"),
+      "カレンダー結果登録（ヨミ→受注）":         "calendar.html#" + encodeURIComponent("カレンダー結果登録（ヨミ→受注）"),
+      "カレンダー結果登録（新規→フォロー）":      "calendar.html#" + encodeURIComponent("カレンダー結果登録（新規→フォロー）"),
+      "カレンダー結果登録（提案→フォロー）":      "calendar.html#" + encodeURIComponent("カレンダー結果登録（提案→フォロー）"),
+      "カレンダー結果登録（ヨミ→フォロー）":      "calendar.html#" + encodeURIComponent("カレンダー結果登録（ヨミ→フォロー）"),
+      "カレンダー結果登録（新規キャンセル）":      "calendar.html#" + encodeURIComponent("カレンダー結果登録（新規キャンセル）"),
+      "カレンダー結果登録（提案キャンセル）":      "calendar.html#" + encodeURIComponent("カレンダー結果登録（提案キャンセル）"),
+      "カレンダー結果登録（ヨミキャンセル）":      "calendar.html#" + encodeURIComponent("カレンダー結果登録（ヨミキャンセル）"),
+      // メール系
+      "メールのルール":    "mail.html#" + encodeURIComponent("メールのルール"),
+      "アポサンクス":      "mail.html#" + encodeURIComponent("アポサンクス"),
+      "アポリマインド":    "mail.html#" + encodeURIComponent("アポリマインド"),
+      "新規サンクス":      "mail.html#" + encodeURIComponent("新規サンクス"),
+      "提案リマインド":    "mail.html#" + encodeURIComponent("提案リマインド"),
+      "受注サンクス":      "mail.html#" + encodeURIComponent("受注サンクス"),
+      // LINE系
+      "アポ報告":    "line.html#" + encodeURIComponent("アポ報告"),
+      "振替依頼":    "line.html#" + encodeURIComponent("振替依頼"),
+      "受注報告（LINE）":      "line.html#" + encodeURIComponent("受注報告（LINE）"),
+      "展示会参加":  "line.html#" + encodeURIComponent("展示会参加"),
+      "交流会参加":  "line.html#" + encodeURIComponent("交流会参加"),
+      "楽楽販売":    "line.html#" + encodeURIComponent("楽楽販売"),
+      // メンバーズ系
+      "受注報告（メンバーズ）": "members.html#" + encodeURIComponent("受注報告（メンバーズ）"),
+      "成功体験（週次）": "members.html#" + encodeURIComponent("成功体験（週次）"),
+     
+      // その他系
+      "楽楽販売":                    "other.html#" + encodeURIComponent("楽楽販売"),
+      "動画投稿":                    "other.html#" + encodeURIComponent("動画投稿"),
+      "チャットワーク　キャンセル登録": "other.html#" + encodeURIComponent("チャットワーク　キャンセル登録"),
+      "コンサル アサイン":            "other.html#" + encodeURIComponent("コンサル アサイン"),
+      "MVの受注後ルール":             "other.html#" + encodeURIComponent("MVの受注後ルール"),
+      "計上ルール":                  "other.html#" + encodeURIComponent("計上ルール"),
+      "覚書":                       "other.html#" + encodeURIComponent("覚書"),
+      "ランキング表入力":              "other.html#" + encodeURIComponent("ランキング表入力"),
+      "成功事例":                    "other.html#" + encodeURIComponent("成功事例"),
+      "取次パートナー":               "other.html#" + encodeURIComponent("取次パートナー"),
+      "セールスクラウド":              "other.html#" + encodeURIComponent("セールスクラウド"),
+      "カスタマービュアー 利用方法":   "other.html#" + encodeURIComponent("カスタマービュアー 利用方法"),
+      "顧客対応":                    "other.html#" + encodeURIComponent("顧客対応"),
+      "クラウドサイン":               "other.html#" + encodeURIComponent("クラウドサイン"),
+      "ISアポイントルール":           "other.html#" + encodeURIComponent("ISアポイントルール"),
+      "ガチ禁登録方法":               "other.html#" + encodeURIComponent("ガチ禁登録方法"),
+      "経費申請":                    "other.html#" + encodeURIComponent("経費申請"),
+      "カレンダー予約":               "other.html#" + encodeURIComponent("カレンダー予約"),
+      "カレンダー追加方法":            "other.html#" + encodeURIComponent("カレンダー追加方法"),
+      "カレンダー共有方法":            "other.html#" + encodeURIComponent("カレンダー共有方法"),
+      "大型受注の運用":               "other.html#" + encodeURIComponent("大型受注の運用"),
+      "配分ルール": "other-bunpai.html",
+      // 定義系
+      "商材":      "definition.html#" + encodeURIComponent("商材"),
+      "属性":      "definition.html#" + encodeURIComponent("属性"),
+      "チャネル":   "definition.html#" + encodeURIComponent("チャネル"),
+      "ヨミ一覧":   "definition.html#" + encodeURIComponent("ヨミ一覧"),
+      "提案ランク": "definition.html#" + encodeURIComponent("提案ランク"),
+      /// 日次系
+      "TODOチェック":      "daily.html#" + encodeURIComponent("TODOチェック"),
+      "アポ進捗の確認方法": "daily.html#" + encodeURIComponent("アポ進捗の確認方法"),
+      "ヨミ表確認・入力":   "daily.html#" + encodeURIComponent("ヨミ表確認・入力"),
+      "未収対応":           "daily.html#" + encodeURIComponent("未収対応"),
+      "日報作成":           "daily.html#" + encodeURIComponent("日報作成"),
+      // 週次系
+      "成功体験":   "weekly.html#" + encodeURIComponent("成功体験"),
+      "９つの約束": "weekly.html#" + encodeURIComponent("９つの約束"),
+      // 月次系
+      "予算申請":           "monthly.html#" + encodeURIComponent("予算申請"),
+      "戦略・行動計画":     "monthly.html#" + encodeURIComponent("戦略・行動計画"),
+      "アポ取得・商談計画":  "monthly.html#" + encodeURIComponent("アポ取得・商談計画"),
+     // 全社ルール系
+      "出退勤ルール": "company-rules.html#" + encodeURIComponent("出退勤ルール"),
+      "身だしなみ":   "company-rules.html#" + encodeURIComponent("身だしなみ"),
+      "清掃ルール":   "company-rules.html#" + encodeURIComponent("清掃ルール"),
+      "会議ルール":   "company-rules.html#" + encodeURIComponent("会議ルール"),
+      "訪問商談":     "company-rules.html#" + encodeURIComponent("訪問商談"),
+      "会食":         "company-rules.html#" + encodeURIComponent("会食"),
+      "虚偽報告":     "company-rules.html#" + encodeURIComponent("虚偽報告"),
+      // Q&A・履歴
+      "Q＆A": "qa.html",
+      "ルール": "history-rule.html",
+      "履歴":   "history.html",
+    };
+
+    async function init() {
+      const data = await fetchSheet(CONFIG.SHEETS.目次);
+      const container = document.getElementById("index-table");
+
+      if (!data || data.length === 0) {
+        container.innerHTML = "<p style='padding:20px;color:#888;'>データがありません</p>";
+        return;
+      }
+
+      // カテゴリごとにグループ化
+      const grouped = {};
+      data.forEach(row => {
+        const cat  = row["カテゴリ"] || "その他";
+        const item = row["項目名"]   || "";
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(item);
+      });
+
+      let tableHtml = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width:180px;text-align:center;">カテゴリ</th>
+              <th style="width:200px;text-align:center;">項目名</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      Object.entries(grouped).forEach(([cat, items]) => {
+        items.forEach((item, i) => {
+          const link = pageLinks[item];
+          const cell = link
+            ? `<a href="${link}">📄 ${item}</a>`
+            : item;
+
+          if (i === 0) {
+            tableHtml += `
+              <tr>
+                <td rowspan="${items.length}"
+                    style="background:#EBF3FB;font-weight:bold;
+                           vertical-align:top;white-space:nowrap;">
+                  ${cat}
+                </td>
+                <td>${cell}</td>
+              </tr>`;
+          } else {
+            tableHtml += `<tr><td>${cell}</td></tr>`;
+          }
+        });
+      });
+
+      tableHtml += "</tbody></table>";
+      container.innerHTML = tableHtml;
+
+      document.getElementById("updated").textContent
+        = "最終更新: " + new Date().toLocaleDateString("ja-JP");
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>フロー | 事業部ルール</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background: #f0f2f5; color: #333;
+    }
+    header {
+      background: #1F4E79; color: white;
+      padding: 20px 40px; display: flex;
+      align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    header h1 { font-size: 22px; letter-spacing: 2px; }
+    header a { color: white; text-decoration: none; font-size: 13px; opacity: 0.8; }
+    header a:hover { opacity: 1; }
+    main { max-width: 1300px; margin: 40px auto; padding: 0 20px; }
+    .section-title {
+      font-size: 14px; color: #888; letter-spacing: 1px;
+      margin-bottom: 16px; border-left: 4px solid #1F4E79; padding-left: 10px;
+    }
+    .phase-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .phase-tab {
+      padding: 8px 20px; border-radius: 20px; font-size: 13px;
+      font-weight: bold; cursor: pointer; border: 2px solid #1F4E79;
+      color: #1F4E79; background: white; transition: all 0.2s;
+    }
+    .phase-tab.active, .phase-tab:hover { background: #1F4E79; color: white; }
+    .flow-wrap {
+      background: white; border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      overflow-x: auto; margin-bottom: 40px;
+    }
+    .legend { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; }
+    .legend-box { width: 14px; height: 14px; border-radius: 3px; border: 2px solid; }
+    .popup-overlay {
+      display: none; position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    .popup-overlay.active { display: flex; }
+    .popup {
+      background: white; border-radius: 8px; padding: 28px;
+      max-width: 560px; width: 90%;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      position: relative; max-height: 80vh; overflow-y: auto;
+    }
+    .popup-close {
+      position: absolute; top: 12px; right: 16px;
+      font-size: 22px; cursor: pointer; color: #888;
+    }
+    .popup-close:hover { color: #333; }
+    .popup h3 {
+      font-size: 16px; color: #1F4E79; margin-bottom: 16px;
+      padding-bottom: 8px; border-bottom: 2px solid #EBF3FB;
+    }
+    .popup-row {
+      display: grid; grid-template-columns: 80px 1fr;
+      gap: 8px; margin-bottom: 12px; font-size: 14px;
+    }
+    .popup-label { color: #888; font-size: 12px; font-weight: bold; padding-top: 2px; }
+    .popup-value { line-height: 1.7; }
+    .popup-value.caution { color: #C00000; }
+    .popup-empty { color: #ccc; font-size: 13px; text-align: center; padding: 20px; }
+    .loading { text-align: center; padding: 40px; color: #888; }
+    footer { text-align: center; padding: 30px; font-size: 12px; color: #aaa; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>事業部ルール</h1>
+    <a href="index.html">← トップに戻る</a>
+  </header>
+
+  <div class="popup-overlay" id="popup-overlay">
+    <div class="popup">
+      <span class="popup-close" id="popup-close">✕</span>
+      <h3 id="popup-title"></h3>
+      <div id="popup-body"></div>
+    </div>
+  </div>
+
+  <main>
+    <p class="section-title">フロー</p>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-box" style="border-color:#1F4E79;background:#EBF3FB;"></div>SL
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="border-color:#7B6000;background:#FFFDE7;"></div>マーケティング
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="border-color:#1B5E20;background:#E8F5E9;"></div>管理部
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="border-color:#7B0000;background:#FDE8E8;"></div>在宅パートナー
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="border-color:#4A148C;background:#F3E5F5;"></div>経営支援
+      </div>
+    </div>
+    <div class="phase-tabs" id="phase-tabs"></div>
+    <div class="flow-wrap" id="flow-wrap">
+      <div class="loading">データを読み込み中...</div>
+    </div>
+  </main>
+
+  <footer>事業部ルール &copy; 2024</footer>
+
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script>
+  const LANES = ["SL","マーケティング","管理部","在宅パートナー","経営支援"];
+  const LANE_STYLE = {
+    "SL":         { header:"#1F4E79", fill:"#EBF3FB", stroke:"#1F4E79", text:"#1F4E79" },
+    "マーケティング": { header:"#7B6000", fill:"#FFFDE7", stroke:"#7B6000", text:"#7B6000" },
+    "管理部":      { header:"#1B5E20", fill:"#E8F5E9", stroke:"#1B5E20", text:"#1B5E20" },
+    "在宅パートナー": { header:"#7B0000", fill:"#FDE8E8", stroke:"#7B0000", text:"#7B0000" },
+    "経営支援":    { header:"#4A148C", fill:"#F3E5F5", stroke:"#4A148C", text:"#4A148C" },
+  };
+
+  const NODE_W      = 150;
+  const NODE_H      = 56;
+  const LANE_W      = 200;
+  const SL_LANE_W   = 400;
+  const ROW_H       = 110;
+  const HEAD_H      = 44;
+  const ARROW_COLOR = "#555";
+
+  // SL列だけ幅広にするためのヘルパー関数
+  function getLaneX(lanes, idx) {
+    let x = 0;
+    for (let i = 0; i < idx; i++) {
+      x += lanes[i] === "SL" ? SL_LANE_W : LANE_W;
+    }
+    return x;
+  }
+  function getLaneW(lane) {
+    return lane === "SL" ? SL_LANE_W : LANE_W;
+  }
+
+  let flowData   = {};
+  let detailData = {};
+
+  async function init() {
+    const [fRows, dRows] = await Promise.all([
+      fetchSheet(CONFIG.SHEETS.フロー),
+      fetchSheet(CONFIG.SHEETS.フロー詳細),
+    ]);
+
+    dRows.forEach(r => {
+      const sid = r["ステップID"];
+      if (sid) detailData[sid] = r;
+    });
+
+    fRows.forEach(r => {
+      const fid = r["フローID"] || "";
+      if (!flowData[fid]) flowData[fid] = [];
+      flowData[fid].push(r);
+    });
+
+    const tabWrap = document.getElementById("phase-tabs");
+    Object.keys(flowData).forEach((fid, i) => {
+      const btn = document.createElement("button");
+      btn.className = "phase-tab" + (i === 0 ? " active" : "");
+      btn.textContent = fid;
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".phase-tab")
+          .forEach(t => t.classList.remove("active"));
+        btn.classList.add("active");
+        renderFlow(fid);
+      });
+      tabWrap.appendChild(btn);
+    });
+
+    const first = Object.keys(flowData)[0];
+    if (first) renderFlow(first);
+  }
+
+  function renderFlow(fid) {
+    const wrap = document.getElementById("flow-wrap");
+    const rows = flowData[fid] || [];
+
+    const stepMap = {};
+    rows.forEach(r => {
+      const sid = r["ステップID"];
+      if (!stepMap[sid]) stepMap[sid] = r;
+    });
+
+    const layout    = buildLayout(rows, stepMap);
+    const usedLanes = LANES.filter(l => rows.some(r => r["担当"] === l));
+    const totalW    = usedLanes.reduce((sum, lane) =>
+      sum + (lane === "SL" ? SL_LANE_W : LANE_W), 0);
+    const totalH    = HEAD_H + layout.length * ROW_H + 60;
+
+    const svg = buildSVG(rows, stepMap, layout, usedLanes, totalW, totalH);
+    wrap.innerHTML = svg;
+
+    rows.forEach(r => {
+      const sid = r["ステップID"];
+      const el  = wrap.querySelector(`[data-sid="${sid}"]`);
+      if (el) {
+        el.style.cursor = "pointer";
+        el.addEventListener("click", () => showPopup(sid));
+      }
+    });
+  }
+
+  function buildLayout(rows, stepMap) {
+    const rowOf   = {};
+    const inCount = {};
+    Object.keys(stepMap).forEach(sid => {
+      rowOf[sid]   = 0;
+      inCount[sid] = 0;
+    });
+
+    rows.forEach(r => {
+      parseNextSteps(r["次ステップ"]).forEach(n => {
+        if (inCount[n] !== undefined) inCount[n]++;
+      });
+    });
+
+    const starts = Object.keys(stepMap).filter(sid => inCount[sid] === 0);
+    if (starts.length === 0) starts.push(Object.keys(stepMap)[0]);
+    starts.forEach(sid => { rowOf[sid] = 0; });
+
+    const queue   = [...starts];
+    const visited = new Set();
+
+    while (queue.length > 0) {
+      const sid = queue.shift();
+      if (visited.has(sid)) continue;
+      visited.add(sid);
+
+      const r = stepMap[sid];
+      if (!r) continue;
+
+      const nexts = parseNextSteps(r["次ステップ"]);
+      const myRow = rowOf[sid] || 0;
+
+      nexts.forEach(n => {
+        if (!stepMap[n]) return;
+        if ((rowOf[n] || 0) < myRow + 1) rowOf[n] = myRow + 1;
+        if (!visited.has(n)) queue.push(n);
+      });
+    }
+
+    // 1-6はSL列右半分に固定するため衝突回避から除外
+    const FIXED_POSITIONS = ["1-6"];
+
+    let changed = true;
+    while (changed) {
+      changed = false;
+      const laneRowUsed = {};
+      Object.keys(rowOf).forEach(sid => {
+        if (FIXED_POSITIONS.includes(sid)) return;
+        const r     = stepMap[sid];
+        if (!r) return;
+        const tanto = r["担当"] || "SL";
+        const row   = rowOf[sid];
+        const key   = `${tanto}_${row}`;
+        if (laneRowUsed[key] && laneRowUsed[key] !== sid) {
+          rowOf[sid] = row + 1;
+          parseNextSteps(r["次ステップ"]).forEach(n => {
+            if (!stepMap[n] || FIXED_POSITIONS.includes(n)) return;
+            if ((rowOf[n] || 0) <= rowOf[sid]) rowOf[n] = rowOf[sid] + 1;
+          });
+          changed = true;
+        } else {
+          laneRowUsed[key] = sid;
+        }
+      });
+    }
+
+    // 1-3aを1-R2の1行下に配置
+    if (rowOf["1-R2"] !== undefined && rowOf["1-3a"] !== undefined) {
+      const targetRow = rowOf["1-R2"] + 1;
+      if (rowOf["1-3a"] < targetRow) {
+        const diff = targetRow - rowOf["1-3a"];
+        ["1-3a","1-4a","1-4b","1-5a","1-5b"].forEach(sid => {
+          if (rowOf[sid] !== undefined) rowOf[sid] += diff;
+        });
+      }
+    }
+
+    // 1-6を1-R1aと同じ行に配置（1回だけ）
+    if (rowOf["1-R1a"] !== undefined && rowOf["1-6"] !== undefined) {
+      rowOf["1-6"] = rowOf["1-R1a"];
+    }
+
+    // 行番号でグループ化
+    const grouped = {};
+    Object.entries(rowOf).forEach(([sid, row]) => {
+      if (!grouped[row]) grouped[row] = [];
+      grouped[row].push(sid);
+    });
+
+    return Object.keys(grouped)
+      .sort((a, b) => Number(a) - Number(b))
+      .map(row => grouped[row]);
+  }
+
+  function buildSVG(rows, stepMap, layout, usedLanes, totalW, totalH) {
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg"
+      width="${totalW}" height="${totalH}"
+      style="font-family:Arial,sans-serif;display:block;">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="6"
+          refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="${ARROW_COLOR}"/>
+        </marker>
+      </defs>`;
+
+    // レーン描画
+    usedLanes.forEach((lane, i) => {
+      const x  = getLaneX(usedLanes, i);
+      const w  = getLaneW(lane);
+      const st = LANE_STYLE[lane];
+      svg += `<rect x="${x}" y="0" width="${w}" height="${HEAD_H}" fill="${st.header}"/>`;
+      svg += `<text x="${x + w/2}" y="${HEAD_H/2 + 5}"
+        text-anchor="middle" fill="white" font-size="13" font-weight="bold">${lane}</text>`;
+      svg += `<rect x="${x}" y="${HEAD_H}" width="${w}"
+        height="${totalH - HEAD_H}" fill="${st.fill}" opacity="0.25"/>`;
+      if (i > 0) {
+        svg += `<line x1="${x}" y1="${HEAD_H}" x2="${x}" y2="${totalH}"
+          stroke="#ccc" stroke-width="1" stroke-dasharray="4,4"/>`;
+      }
+    });
+
+    // ノード位置マップ
+    const posMap = {};
+    layout.forEach((rowSids, rowIdx) => {
+      const cy = HEAD_H + rowIdx * ROW_H + ROW_H / 2;
+      const slNodes = rowSids.filter(sid => stepMap[sid] && stepMap[sid]["担当"] === "SL");
+
+      rowSids.forEach(sid => {
+        const r = stepMap[sid];
+        if (!r) return;
+        const tanto   = r["担当"] || "SL";
+        const laneIdx = usedLanes.indexOf(tanto);
+        if (laneIdx < 0) return;
+
+        const laneX = getLaneX(usedLanes, laneIdx);
+        const laneW = getLaneW(tanto);
+
+        let cx;
+        if (tanto === "SL" && sid === "1-6") {
+          cx = laneX + laneW * 3 / 4;
+        } else if (tanto === "SL" && slNodes.length > 1) {
+          const slIdx = slNodes.indexOf(sid);
+          const slW   = laneW / slNodes.length;
+          cx = laneX + slW * slIdx + slW / 2;
+        } else {
+          cx = laneX + laneW / 2;
+        }
+
+        posMap[sid] = { cx, cy };
+      });
+    });
+
+    // 矢印描画
+    const drawnArrows = new Set();
+    rows.forEach(r => {
+      const sid   = r["ステップID"];
+      const nexts = parseNextSteps(r["次ステップ"]);
+      const conds = parseConditions(r["分岐条件"], nexts);
+      const from  = posMap[sid];
+      if (!from) return;
+
+      nexts.forEach((nid, idx) => {
+        const key = `${sid}->${nid}`;
+        if (drawnArrows.has(key)) return;
+        drawnArrows.add(key);
+
+        const to = posMap[nid];
+        if (!to) return;
+
+        const x1    = from.cx;
+        const y1    = from.cy + NODE_H / 2;
+        const x2    = to.cx;
+        const y2    = to.cy - NODE_H / 2 - 4;
+        const label = conds[idx] || "";
+
+        // 1-3 → 1-R1b の場合は1-6の下を通る
+        let routeY = y1 + (y2 - y1) * 0.5;
+        if (sid === "1-3" && nid === "1-R1b" && posMap["1-6"]) {
+          routeY = posMap["1-6"].cy + NODE_H / 2 + 15;
+        }
+
+        if (Math.abs(x1 - x2) < 4) {
+          svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+            stroke="${ARROW_COLOR}" stroke-width="1.5" marker-end="url(#arr)"/>`;
+        } else {
+          svg += `<polyline points="${x1},${y1} ${x1},${routeY} ${x2},${routeY} ${x2},${y2}"
+            fill="none" stroke="${ARROW_COLOR}" stroke-width="1.5"
+            marker-end="url(#arr)"/>`;
+        }
+
+        if (label) {
+          const lx = x1 + (x2 - x1) * 0.3;
+          const ly = routeY - 5;
+          const lw = label.length * 7 + 10;
+          svg += `<rect x="${lx - lw/2}" y="${ly - 12}" width="${lw}" height="16"
+            rx="4" fill="white" stroke="#ddd" stroke-width="1"/>`;
+          svg += `<text x="${lx}" y="${ly}"
+            text-anchor="middle" font-size="10" fill="#888">${label}</text>`;
+        }
+      });
+    });
+
+    // ノード描画
+    const drawnNodes = new Set();
+    rows.forEach(r => {
+      const sid = r["ステップID"];
+      if (drawnNodes.has(sid)) return;
+      drawnNodes.add(sid);
+
+      const pos = posMap[sid];
+      if (!pos) return;
+
+      const tanto = r["担当"] || "SL";
+      const st    = LANE_STYLE[tanto] || LANE_STYLE["SL"];
+      const name  = r["ステップ名"] || "";
+      const type  = r["分岐タイプ"] || "順次";
+      const { cx, cy } = pos;
+
+      const lines  = wrapText(name, 12);
+      const nodeH  = Math.max(NODE_H, 20 + lines.length * 16 + 10);
+      const x      = cx - NODE_W / 2;
+      const y      = cy - nodeH / 2;
+
+      const strokeColor = (type === "分岐" || type === "並行＋分岐" || type === "並行")
+        ? "#FF8F00" : st.stroke;
+      const strokeDash  = type === "並行" ? 'stroke-dasharray="6,3"' : "";
+
+      svg += `<g data-sid="${sid}" style="cursor:pointer">`;
+      svg += `<rect x="${x}" y="${y}" width="${NODE_W}" height="${nodeH}"
+        rx="6" fill="${st.fill}" stroke="${strokeColor}" stroke-width="2" ${strokeDash}/>`;
+      svg += `<text x="${cx}" y="${y + 13}"
+        text-anchor="middle" fill="#aaa" font-size="10"
+        pointer-events="none">${sid}</text>`;
+
+      lines.forEach((line, i) => {
+        svg += `<text x="${cx}" y="${y + 26 + i * 16}"
+          text-anchor="middle" fill="${st.text}"
+          font-size="12" font-weight="bold"
+          pointer-events="none">${line}</text>`;
+      });
+
+      svg += `</g>`;
+    });
+
+    svg += `</svg>`;
+    return svg;
+  }
+
+  function parseNextSteps(val) {
+    if (!val) return [];
+    return val.split("/")
+      .map(s => s.trim().replace(/\s+/g, ""))
+      .filter(s => s && s !== "終了");
+  }
+
+  function parseConditions(val, nexts) {
+    if (!val) return nexts.map(() => "");
+    const parts = val.split("/").map(s => s.trim());
+    return nexts.map((nid, i) => {
+      const matched = parts.find(p => {
+        const clean = p
+          .replace(/（[^）]*）/g, "")
+          .replace(/\([^)]*\)/g, "")
+          .replace(/\s/g, "");
+        return clean.includes(nid.replace(/\s/g, ""));
+      });
+      if (matched) return matched.split("→")[0].trim();
+      return parts[i] ? parts[i].split("→")[0].trim() : "";
+    });
+  }
+
+  function wrapText(text, maxLen) {
+    if (!text) return [""];
+    if (text.includes("\n")) {
+      return text.split("\n").map(s => s.trim()).filter(s => s);
+    }
+    if (text.length <= maxLen) return [text];
+    const lines = [];
+    let cur = "";
+    for (const ch of text) {
+      cur += ch;
+      if (cur.length >= maxLen) { lines.push(cur); cur = ""; }
+    }
+    if (cur) lines.push(cur);
+    return lines;
+  }
+
+  function showPopup(sid) {
+    const baseSid = sid.replace(/[a-zA-Z]+$/, "");
+    let detail = detailData[sid];
+    if (!detail) {
+      detail = Object.values(detailData).find(d => {
+        const dBase = (d["ステップID"] || "").replace(/[a-zA-Z]+$/, "");
+        return dBase === baseSid;
+      });
+    }
+
+    const overlay = document.getElementById("popup-overlay");
+    const title   = document.getElementById("popup-title");
+    const body    = document.getElementById("popup-body");
+
+    title.textContent = sid + (detail ? "　" + (detail["ステップ名"] || "") : "");
+
+    if (!detail) {
+      body.innerHTML = `<p class="popup-empty">詳細データがありません</p>`;
+    } else {
+      const fields = [
+        { label: "カテゴリ", key: "カテゴリ",  caution: false },
+        { label: "種別",     key: "種別",      caution: false },
+        { label: "内容",     key: "内容",      caution: false },
+        { label: "注意点",   key: "注意点",    caution: true  },
+      ];
+      body.innerHTML = fields.map(f => {
+        const val = (detail[f.key] || "").replace(/\n/g, "<br>");
+        if (!val) return "";
+        return `
+          <div class="popup-row">
+            <div class="popup-label">${f.label}</div>
+            <div class="popup-value ${f.caution ? "caution" : ""}">${val}</div>
+          </div>`;
+      }).join("");
+    }
+    overlay.classList.add("active");
+  }
+
+  document.getElementById("popup-close").addEventListener("click", () => {
+    document.getElementById("popup-overlay").classList.remove("active");
+  });
+  document.getElementById("popup-overlay").addEventListener("click", e => {
+    if (e.target === e.currentTarget)
+      document.getElementById("popup-overlay").classList.remove("active");
+  });
+
+  init();
+  </script>
+</body>
+</html>

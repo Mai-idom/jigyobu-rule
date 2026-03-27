@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>配分ルール | 事業部ルール</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background: #f0f2f5; color: #333;
+    }
+    header {
+      background: #1F4E79; color: white;
+      padding: 20px 40px; display: flex;
+      align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header h1 { font-size: 22px; letter-spacing: 2px; }
+    header a { color: white; text-decoration: none; font-size: 13px; opacity: 0.8; }
+    header a:hover { opacity: 1; }
+    main { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+    .section-title {
+      font-size: 14px; color: #888; letter-spacing: 1px;
+      margin-bottom: 16px; border-left: 4px solid #1F4E79; padding-left: 10px;
+    }
+    .filter-wrap {
+      display: flex; gap: 12px; margin-bottom: 20px;
+      align-items: center; flex-wrap: wrap;
+    }
+    .filter-wrap input {
+      padding: 8px 12px; border: 1px solid #ddd;
+      border-radius: 4px; font-size: 14px; background: white; flex: 1;
+    }
+    .count { font-size: 13px; color: #888; margin-bottom: 12px; }
+    .table-wrap {
+      background: white; border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1); overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+    thead th {
+      background: #1F4E79; color: white; padding: 10px 8px;
+      text-align: center; font-weight: normal; font-size: 11px;
+      letter-spacing: 1px; border-bottom: 2px solid #ddd;
+      white-space: nowrap; overflow: hidden;
+    }
+    tbody tr:nth-child(even) { background: #f9f9f9; }
+    tbody tr:hover { background: #EBF3FB; }
+    tbody td {
+      padding: 8px; border-bottom: 1px solid #eee;
+      vertical-align: middle; text-align: center;
+      word-break: break-word; overflow: hidden;
+    }
+    tbody td:first-child,
+    tbody td:nth-child(2),
+    tbody td:nth-child(3) { text-align: left; }
+    .loading { text-align: center; padding: 40px; color: #888; }
+    footer { text-align: center; padding: 30px; font-size: 12px; color: #aaa; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>事業部ルール</h1>
+    <a href="index.html">← トップに戻る</a>
+  </header>
+
+  <main>
+    <p class="section-title">配分ルール</p>
+
+    <div class="filter-wrap">
+      <input type="text" id="keyword" placeholder="キーワードで絞り込む...">
+    </div>
+    <p class="count" id="count"></p>
+
+    <div class="table-wrap">
+      <div id="main-table" class="loading">データを読み込み中...</div>
+    </div>
+  </main>
+
+  <footer>事業部ルール &copy; 2024</footer>
+
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script>
+    let allData = [];
+    const cols = ["属性","分類①","分類②","新規アポ","再アポ","トス","新規商談","リカバリー商談","提案","クロージング","支援","前回支援"];
+
+    async function init() {
+      allData = await fetchSheet(CONFIG.SHEETS.その他配分ルール);
+      render(allData);
+      document.getElementById("keyword").addEventListener("input", filter);
+    }
+
+    function filter() {
+      const keyword = document.getElementById("keyword").value.toLowerCase();
+      const filtered = allData.filter(row =>
+        !keyword || Object.values(row).some(v => v.toLowerCase().includes(keyword))
+      );
+      render(filtered);
+    }
+
+    function render(data) {
+      const container = document.getElementById("main-table");
+      document.getElementById("count").textContent = `${data.length} 件`;
+
+      if (data.length === 0) {
+        container.innerHTML = "<p style='padding:20px;color:#888;'>該当するデータがありません</p>";
+        return;
+      }
+
+      const widths = ["9%","9%","9%","7%","7%","7%","8%","10%","7%","9%","7%","8%"];
+
+      let html = "<table><thead><tr>";
+      cols.forEach((c, i) => {
+        html += `<th style="width:${widths[i]};">${c}</th>`;
+      });
+      html += "</tr></thead><tbody>";
+
+      data.forEach(row => {
+        html += "<tr>";
+        cols.forEach(c => {
+          html += `<td>${row[c] || ""}</td>`;
+        });
+        html += "</tr>";
+      });
+
+      html += "</tbody></table>";
+      container.innerHTML = html;
+
+      // アンカースクロール
+      if (window.location.hash) {
+        const id = window.location.hash.slice(1);
+        const el = document.getElementById(id);
+        if (el) {
+          setTimeout(() => {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            el.style.background = "#FFF9C4";
+            setTimeout(() => { el.style.background = ""; }, 2000);
+          }, 500);
+        }
+      }
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

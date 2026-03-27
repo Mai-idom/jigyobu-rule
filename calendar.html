@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>カレンダー | 事業部ルール</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background: #f0f2f5;
+      color: #333;
+    }
+    header {
+      background: #1F4E79; color: white;
+      padding: 20px 40px; display: flex;
+      align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header h1 { font-size: 22px; letter-spacing: 2px; }
+    header a {
+      color: white;
+      text-decoration: none;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+    header a:hover { opacity: 1; }
+    main { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+    .section-title {
+      font-size: 14px;
+      color: #888;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      border-left: 4px solid #1F4E79;
+      padding-left: 10px;
+    }
+    .filter-wrap {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .filter-wrap select,
+    .filter-wrap input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      background: white;
+    }
+    .filter-wrap select { width: 180px; }
+    .filter-wrap input  { flex: 1; min-width: 200px; }
+    .count { font-size: 13px; color: #888; margin-bottom: 12px; }
+    .table-wrap {
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      table-layout: fixed;
+    }
+    .cat-row td {
+      background: #1F4E79;
+      color: white;
+      font-weight: bold;
+      padding: 8px 16px;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+    thead th {
+      background: #f0f2f5;
+      color: #666;
+      padding: 10px 16px;
+      text-align: left;
+      font-weight: bold;
+      font-size: 12px;
+      letter-spacing: 1px;
+      border-bottom: 2px solid #ddd;
+      overflow: hidden;
+    }
+    tbody tr:not(.cat-row):nth-child(even) { background: #f9f9f9; }
+    tbody tr:not(.cat-row):hover { background: #EBF3FB; }
+    tbody td {
+      padding: 10px 16px;
+      border-bottom: 1px solid #eee;
+      vertical-align: top;
+      line-height: 1.7;
+      text-align: left;
+      word-break: break-word;
+      overflow: hidden;
+    }
+    .caution { color: #C00000; font-size: 13px; }
+    .ref-link {
+      color: #1F4E79;
+      font-size: 13px;
+      text-decoration: none;
+      display: inline-block;
+      padding: 4px 8px;
+      background: #EBF3FB;
+      border-radius: 4px;
+    }
+    .ref-link:hover { background: #1F4E79; color: white; }
+    .thumb {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      transition: opacity 0.2s;
+      display: block;
+    }
+    .thumb:hover { opacity: 0.8; }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-overlay img {
+      max-width: 90%;
+      max-height: 90vh;
+      border-radius: 6px;
+    }
+    .modal-close {
+      position: fixed;
+      top: 20px; right: 30px;
+      color: white;
+      font-size: 36px;
+      cursor: pointer;
+    }
+    .loading { text-align: center; padding: 40px; color: #888; }
+    footer { text-align: center; padding: 30px; font-size: 12px; color: #aaa; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>事業部ルール</h1>
+    <a href="index.html">← トップに戻る</a>
+  </header>
+
+  <div class="modal-overlay" id="modal">
+    <span class="modal-close" id="modal-close">✕</span>
+    <img id="modal-img" src="" alt="">
+  </div>
+
+  <main>
+    <p class="section-title">カレンダー</p>
+
+    <div class="filter-wrap">
+      <select id="cat-filter">
+        <option value="">すべてのカテゴリ</option>
+      </select>
+      <input type="text" id="keyword" placeholder="キーワードで絞り込む...">
+    </div>
+
+    <p class="count" id="count"></p>
+
+    <div class="table-wrap">
+      <div id="cal-table" class="loading">データを読み込み中...</div>
+    </div>
+  </main>
+
+  <footer>事業部ルール &copy; 2024</footer>
+
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script>
+    let allData = [];
+
+    const modal      = document.getElementById("modal");
+    const modalImg   = document.getElementById("modal-img");
+    const modalClose = document.getElementById("modal-close");
+
+    function openModal(src) {
+      modalImg.src = src;
+      modal.classList.add("active");
+    }
+
+    modalClose.addEventListener("click", () => modal.classList.remove("active"));
+    modal.addEventListener("click", e => {
+      if (e.target === modal) modal.classList.remove("active");
+    });
+
+    // 画像URLかどうか判定
+    function isImageUrl(url) {
+      return /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(url);
+    }
+
+    async function init() {
+      allData = await fetchSheet(CONFIG.SHEETS.カレンダー);
+
+      const cats = [...new Set(allData.map(r => r["カテゴリ"]).filter(Boolean))];
+      const sel  = document.getElementById("cat-filter");
+      cats.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        sel.appendChild(opt);
+      });
+
+      render(allData);
+
+      document.getElementById("cat-filter").addEventListener("change", filter);
+      document.getElementById("keyword").addEventListener("input", filter);
+    }
+
+    function filter() {
+      const cat     = document.getElementById("cat-filter").value;
+      const keyword = document.getElementById("keyword").value.toLowerCase();
+      const filtered = allData.filter(row => {
+        const matchCat = !cat || row["カテゴリ"] === cat;
+        const matchKey = !keyword ||
+          Object.values(row).some(v => v.toLowerCase().includes(keyword));
+        return matchCat && matchKey;
+      });
+      render(filtered);
+    }
+
+    function render(data) {
+      const container = document.getElementById("cal-table");
+      document.getElementById("count").textContent = `${data.length} 件`;
+
+      if (data.length === 0) {
+        container.innerHTML = "<p style='padding:20px;color:#888;'>該当するデータがありません</p>";
+        return;
+      }
+
+      const grouped = {};
+      data.forEach(row => {
+        const cat = row["カテゴリ"] || "";
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(row);
+      });
+
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width:15%;">項目名</th>
+              <th style="width:30%;">内容</th>
+              <th style="width:30%;">注意点</th>
+              <th style="width:10%;">参照</th>
+              <th style="width:10%;">画像</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      Object.entries(grouped).forEach(([cat, rows]) => {
+        const catId = encodeURIComponent(cat.split('\n')[0].trim());
+        html += `<tr class="cat-row" id="${catId}"><td colspan="5">📂 ${cat}</td></tr>`;
+
+        rows.forEach(row => {
+          // 参照URL
+          const refUrl = row["参照URL"] || "";
+          let refCell = "";
+          if (refUrl) {
+            if (isImageUrl(refUrl)) {
+              refCell = `<img src="${refUrl}" class="thumb" alt="参照画像"
+                           onclick="openModal('${refUrl}')">`;
+            } else {
+              refCell = `<a href="${refUrl}" target="_blank" class="ref-link">🔗 開く</a>`;
+            }
+          }
+
+          // 画像URL
+          const imgUrl = row["画像URL"] || "";
+          let imgCell = "";
+          if (imgUrl) {
+            if (isImageUrl(imgUrl)) {
+              imgCell = `<img src="${imgUrl}" class="thumb" alt="画像"
+                           onclick="openModal('${imgUrl}')">`;
+            } else {
+              imgCell = `<a href="${imgUrl}" target="_blank" class="ref-link">🔗 開く</a>`;
+            }
+          }
+
+          html += `
+            <tr>
+              <td><strong>${row["項目名"] || ""}</strong></td>
+              <td>${(row["内容"] || "").replace(/\n/g, "<br>")}</td>
+              <td class="caution">${(row["注意点"] || "").replace(/\n/g, "<br>")}</td>
+              <td>${refCell}</td>
+              <td>${imgCell}</td>
+            </tr>
+          `;
+        });
+      });
+
+      html += "</tbody></table>";
+      container.innerHTML = html;
+    }
+
+    init().then(() => {
+  if (window.location.hash) {
+    const id = window.location.hash.slice(1);
+    const el = document.getElementById(id);
+    if (el) {
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.style.background = "#FFF9C4";
+        setTimeout(() => { el.style.background = ""; }, 2000);
+      }, 500);
+    }
+  }
+});
+
+  </script>
+
+</body>
+</html>
