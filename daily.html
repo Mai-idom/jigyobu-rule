@@ -294,7 +294,7 @@
             <tr>
               <td><strong>${row["項目名"] || ""}</strong></td>
               <td>${(row["内容"] || "").replace(/\n/g, "<br>")}</td>
-              <td class="caution">${(row["注意点"] || "").replace(/\n/g, "<br>")}</td>
+              <td class="caution">${convertLinks(row["注意点"] || "")}</td>
               <td>${refCell}</td>
               <td>${imgCell}</td>
             </tr>

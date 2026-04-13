@@ -668,6 +668,21 @@
             <div class="popup-value ${f.caution ? "caution" : ""}">${val}</div>
           </div>`;
       }).join("");
+
+      // リンク先がある場合はボタンを追加
+      const linkUrl = detail["リンク先"] || "";
+      if (linkUrl) {
+        body.innerHTML += `
+          <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee;">
+            <a href="${linkUrl}" target="_blank"
+              style="display:inline-block;padding:8px 16px;
+                     background:#1F4E79;color:white;
+                     text-decoration:none;border-radius:4px;
+                     font-size:13px;font-weight:bold;">
+              📄 詳細を見る
+            </a>
+          </div>`;
+      }
     }
     overlay.classList.add("active");
   }

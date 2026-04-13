@@ -29,3 +29,40 @@ async function fetchSheet(sheetName) {
     return [];
   }
 }
+
+function convertLinks(text) {
+  if (!text) return "";
+
+  const pageMap = {
+    "LINE":       "line.html",
+    "日次":       "daily.html",
+    "週次":       "weekly.html",
+    "月次":       "monthly.html",
+    "その他":     "other.html",
+    "カレンダー": "calendar.html",
+    "メール":     "mail.html",
+    "メンバーズ": "members.html",
+    "全社ルール": "company-rules.html",
+  };
+
+  text = text.replace(
+    /([^\s「」]+)「([^」]+)」参照/g,
+    (match, pageName, catName) => {
+      const url = pageMap[pageName];
+      if (!url) return match;
+      const link = `${url}#${encodeURIComponent(catName)}`;
+      return `<a href="${link}" target="_blank" style="color:#1F4E79;font-weight:bold;text-decoration:underline;">${match}</a>`;
+    }
+  );
+
+  text = text.replace(
+    /([^\s「」]+)全体参照/g,
+    (match, pageName) => {
+      const url = pageMap[pageName];
+      if (!url) return match;
+      return `<a href="${url}" target="_blank" style="color:#1F4E79;font-weight:bold;text-decoration:underline;">${match}</a>`;
+    }
+  );
+
+  return text.replace(/\n/g, "<br>");
+}

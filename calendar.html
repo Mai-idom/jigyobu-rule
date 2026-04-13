@@ -262,8 +262,15 @@
       `;
 
       Object.entries(grouped).forEach(([cat, rows]) => {
-        const catId = encodeURIComponent(cat.split('\n')[0].trim());
-        html += `<tr class="cat-row" id="${catId}"><td colspan="5">📂 ${cat}</td></tr>`;
+        const catLines = cat.split('\n').map(s => s.trim()).filter(s => s);
+        const catId = encodeURIComponent(catLines[0]);
+        let catRow = `<tr class="cat-row" id="${catId}">`;
+         // 2行目以降もIDとして追加
+         catLines.slice(1).forEach(line => {
+         catRow += `<td id="${encodeURIComponent(line)}" style="display:none;"></td>`;
+         });
+        catRow += `<td colspan="5">📂 ${cat.replace(/\n/g, ' / ')}</td></tr>`;
+        html += catRow;
 
         rows.forEach(row => {
           // 参照URL
@@ -290,10 +297,23 @@
             }
           }
 
+          const isCopyable = row["項目名"] === "説明コピペ用";
+          const contentText = row["内容"] || "";
+          const copyBtn = isCopyable
+            ? `<button onclick="copyText(this, \`${contentText.replace(/`/g, "'")}\`)"
+                style="margin-top:6px;padding:4px 12px;background:#1F4E79;color:white;
+                       border:none;border-radius:4px;cursor:pointer;font-size:12px;">
+                📋 コピー
+              </button>`
+            : "";
+
           html += `
             <tr>
               <td><strong>${row["項目名"] || ""}</strong></td>
-              <td>${(row["内容"] || "").replace(/\n/g, "<br>")}</td>
+              <td>
+                ${copyBtn}
+                <div style="margin-top:8px;">${contentText.replace(/\n/g, "<br>")}</div>
+              </td>
               <td class="caution">${(row["注意点"] || "").replace(/\n/g, "<br>")}</td>
               <td>${refCell}</td>
               <td>${imgCell}</td>
@@ -306,11 +326,25 @@
       container.innerHTML = html;
     }
 
+function copyText(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = "✅ コピーしました！";
+        btn.style.background = "#1B5E20";
+        setTimeout(() => {
+          btn.textContent = "📋 コピー";
+          btn.style.background = "#1F4E79";
+        }, 2000);
+      });
+    }
+
     init().then(() => {
   if (window.location.hash) {
     const id = window.location.hash.slice(1);
-    const el = document.getElementById(id);
+    let el = document.getElementById(id);
     if (el) {
+      if (el.style.display === "none") {
+        el = el.closest("tr") || el;
+      }
       setTimeout(() => {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
         el.style.background = "#FFF9C4";
