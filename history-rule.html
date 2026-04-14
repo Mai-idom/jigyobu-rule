@@ -78,7 +78,7 @@
 
     async function init() {
       allData = await fetchSheet(CONFIG.SHEETS.更新履歴ルール);
-      render(allData);
+      render(allData, "");
       document.getElementById("keyword").addEventListener("input", filter);
     }
 
@@ -87,10 +87,10 @@
       const filtered = allData.filter(row =>
         !keyword || Object.values(row).some(v => v.toLowerCase().includes(keyword))
       );
-      render(filtered);
+      render(filtered, document.getElementById("keyword").value);
     }
 
-    function render(data) {
+    function render(data, keyword = "") {
       const container = document.getElementById("main-table");
       document.getElementById("count").textContent = `${data.length} 件`;
       if (data.length === 0) {
@@ -113,9 +113,9 @@
       data.forEach(row => {
         html += `
           <tr>
-            <td><strong>${row["項目"] || ""}</strong></td>
-            <td>${(row["説明"] || "").replace(/\n/g, "<br>")}</td>
-            <td class="caution">${(row["注意点"] || "").replace(/\n/g, "<br>")}</td>
+            <td><strong>${highlightText(row["項目"] || "", keyword)}</strong></td>
+            <td>${highlightText((row["説明"] || "").replace(/\n/g, "<br>"), keyword)}</td>
+            <td class="caution">${convertLinks(highlightText(row["注意点"] || "", keyword))}</td>
           </tr>
         `;
       });

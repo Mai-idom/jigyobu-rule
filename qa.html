@@ -107,7 +107,7 @@
         const opt = document.createElement("option");
         opt.value = cat; opt.textContent = cat; sel.appendChild(opt);
       });
-      render(allData);
+    render(allData, "");
       document.getElementById("cat-filter").addEventListener("change", filter);
       document.getElementById("keyword").addEventListener("input", filter);
     }
@@ -120,10 +120,10 @@
         const matchKey = !keyword || Object.values(row).some(v => v.toLowerCase().includes(keyword));
         return matchCat && matchKey;
       });
-      render(filtered);
+      render(filtered, document.getElementById("keyword").value);
     }
 
-    function render(data) {
+    function render(data, keyword = "") {
       const container = document.getElementById("main-table");
       document.getElementById("count").textContent = `${data.length} 件`;
       if (data.length === 0) {
@@ -153,7 +153,8 @@
       `;
 
       Object.entries(grouped).forEach(([cat, rows]) => {
-        html += `<tr class="cat-row"><td colspan="5">📂 ${cat}</td></tr>`;
+        const catId = encodeURIComponent(cat);
+        html += `<tr class="cat-row" id="${catId}"><td colspan="5">📂 ${cat}</td></tr>`;
         rows.forEach(row => {
           const refUrl = row["参照URL"] || "";
           const refCell = refUrl
@@ -162,9 +163,9 @@
           html += `
             <tr>
               <td><span class="q-num">${row["質問番号"] || ""}</span></td>
-              <td class="question">${(row["質問内容"] || "").replace(/\n/g, "<br>")}</td>
-              <td class="answer">${(row["回答"] || "").replace(/\n/g, "<br>")}</td>
-              <td class="caution">${(row["注意点"] || "").replace(/\n/g, "<br>")}</td>
+              <td class="question">${highlightText((row["質問内容"] || "").replace(/\n/g, "<br>"), keyword)}</td>
+              <td class="answer">${highlightText((row["回答"] || "").replace(/\n/g, "<br>"), keyword)}</td>
+              <td class="caution">${convertLinks(highlightText(row["注意点"] || "", keyword))}</td>
               <td>${refCell}</td>
             </tr>
           `;

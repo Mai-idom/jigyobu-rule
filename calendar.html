@@ -213,7 +213,7 @@
         sel.appendChild(opt);
       });
 
-      render(allData);
+      render(allData, "");
 
       document.getElementById("cat-filter").addEventListener("change", filter);
       document.getElementById("keyword").addEventListener("input", filter);
@@ -228,10 +228,10 @@
           Object.values(row).some(v => v.toLowerCase().includes(keyword));
         return matchCat && matchKey;
       });
-      render(filtered);
+      render(filtered, document.getElementById("keyword").value);
     }
 
-    function render(data) {
+    function render(data, keyword = "") {
       const container = document.getElementById("cal-table");
       document.getElementById("count").textContent = `${data.length} 件`;
 
@@ -297,6 +297,7 @@
             }
           }
 
+          const itemId = encodeURIComponent(row["項目名"] || "");
           const isCopyable = row["項目名"] === "説明コピペ用";
           const contentText = row["内容"] || "";
           const copyBtn = isCopyable
@@ -308,17 +309,17 @@
             : "";
 
           html += `
-            <tr>
-              <td><strong>${row["項目名"] || ""}</strong></td>
+              <tr id="${itemId}">
+              <td><strong>${highlightText(row["項目名"] || "", keyword)}</strong></td>
               <td>
-                ${copyBtn}
-                <div style="margin-top:8px;">${contentText.replace(/\n/g, "<br>")}</div>
+               ${copyBtn}
+               <div style="margin-top:8px;">${highlightText(contentText.replace(/\n/g, "<br>"), keyword)}</div>
               </td>
-              <td class="caution">${(row["注意点"] || "").replace(/\n/g, "<br>")}</td>
+              <td class="caution">${convertLinks(highlightText(row["注意点"] || "", keyword))}</td>
               <td>${refCell}</td>
               <td>${imgCell}</td>
-            </tr>
-          `;
+             </tr>
+            `;
         });
       });
 

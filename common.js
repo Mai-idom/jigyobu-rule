@@ -66,3 +66,10 @@ function convertLinks(text) {
 
   return text.replace(/\n/g, "<br>");
 }
+
+function highlightText(text, keyword) {
+  if (!keyword) return text;
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escaped})`, 'gi');
+  return text.replace(regex, '<mark style="background:#FFF176;padding:0 2px;">$1</mark>');
+}

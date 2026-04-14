@@ -146,7 +146,7 @@
         sel.appendChild(opt);
       });
 
-      render(allData);
+     render(allData, "");
 
       document.getElementById("cat-filter").addEventListener("change", filter);
       document.getElementById("keyword").addEventListener("input", filter);
@@ -163,10 +163,10 @@
         return matchCat && matchKey;
       });
 
-      render(filtered);
+      render(filtered, document.getElementById("keyword").value);
     }
 
-    function render(data) {
+    function render(data, keyword = "") {
       const container = document.getElementById("def-table");
       document.getElementById("count").textContent = `${data.length} 件`;
 
@@ -206,12 +206,12 @@
 
         rows.forEach(row => {
           html += `
-            <tr>
-              <td><strong>${row["項目名"] || ""}</strong></td>
-              <td>${(row["内容"] || "").replace(/\n/g, "<br>")}</td>
-              <td style="color:#888;font-size:13px;">${(row["備考"] || "").replace(/\n/g, "<br>")}</td>
-            </tr>
-          `;
+         <tr>
+         <td><strong>${highlightText(row["項目名"] || "", keyword)}</strong></td>
+         <td>${highlightText((row["内容"] || "").replace(/\n/g, "<br>"), keyword)}</td>
+         <td class="備考">${highlightText(row["備考"] || "", keyword)}</td>
+         </tr>
+         `;
         });
       });
 

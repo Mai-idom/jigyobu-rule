@@ -87,7 +87,7 @@
 
     async function init() {
       allData = await fetchSheet(CONFIG.SHEETS.更新履歴);
-      render(allData);
+      render(allData, "");
       document.getElementById("keyword").addEventListener("input", filter);
     }
 
@@ -96,10 +96,10 @@
       const filtered = allData.filter(row =>
         !keyword || Object.values(row).some(v => v.toLowerCase().includes(keyword))
       );
-      render(filtered);
+      render(filtered, document.getElementById("keyword").value);
     }
 
-    function render(data) {
+    function render(data, keyword = "") {
       const container = document.getElementById("main-table");
       document.getElementById("count").textContent = `${data.length} 件`;
       if (data.length === 0) {
@@ -124,15 +124,15 @@
 
       data.forEach(row => {
         html += `
-          <tr>
-            <td class="date">${row["更新日"] || ""}</td>
-            <td>${row["配信者"] || ""}</td>
-            <td>${row["更新者"] || ""}</td>
-            <td><span class="badge">${row["更新箇所シート名"] || ""}</span></td>
-            <td><strong>${row["項目名"] || ""}</strong></td>
-            <td>${(row["更新内容"] || "").replace(/\n/g, "<br>")}</td>
-          </tr>
-        `;
+        <tr>
+         <td class="date">${row["更新日"] || ""}</td>
+         <td>${row["配信者"] || ""}</td>
+         <td>${row["更新者"] || ""}</td>
+         <td><span class="badge">${row["更新箇所シート名"] || ""}</span></td>
+         <td><strong>${highlightText(row["項目名"] || "", keyword)}</strong></td>
+         <td>${highlightText((row["更新内容"] || "").replace(/\n/g, "<br>"), keyword)}</td>
+        </tr>
+      `;
       });
 
       html += "</tbody></table>";

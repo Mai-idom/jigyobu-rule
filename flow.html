@@ -635,9 +635,12 @@
   }
 
   function showPopup(sid) {
-    const baseSid = sid.replace(/[a-zA-Z]+$/, "");
+    // このIDは枝番をそのまま使う
+    const EXACT_MATCH_IDS = ["1-3a", "5-4a"];
+    
     let detail = detailData[sid];
-    if (!detail) {
+    if (!detail && !EXACT_MATCH_IDS.includes(sid)) {
+      const baseSid = sid.replace(/[a-zA-Z]+$/, "");
       detail = Object.values(detailData).find(d => {
         const dBase = (d["ステップID"] || "").replace(/[a-zA-Z]+$/, "");
         return dBase === baseSid;

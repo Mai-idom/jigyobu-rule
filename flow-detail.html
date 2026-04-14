@@ -146,9 +146,6 @@
       <select id="cat-filter">
         <option value="">すべてのカテゴリ</option>
       </select>
-      <select id="type-filter">
-        <option value="">すべての種別</option>
-      </select>
       <input type="text" id="keyword" placeholder="キーワードで絞り込む...">
     </div>
 
@@ -179,40 +176,26 @@
         catSel.appendChild(opt);
       });
 
-      // 種別一覧
-      const types = [...new Set(allData.map(r => r["種別"]).filter(Boolean))];
-      const typeSel = document.getElementById("type-filter");
-      types.forEach(type => {
-        const opt = document.createElement("option");
-        opt.value = type;
-        opt.textContent = type;
-        typeSel.appendChild(opt);
-      });
-
-      render(allData);
+      render(allData, "");
 
       document.getElementById("cat-filter").addEventListener("change", filter);
-      document.getElementById("type-filter").addEventListener("change", filter);
       document.getElementById("keyword").addEventListener("input", filter);
     }
 
     function filter() {
       const cat     = document.getElementById("cat-filter").value;
-      const type    = document.getElementById("type-filter").value;
       const keyword = document.getElementById("keyword").value.toLowerCase();
 
       const filtered = allData.filter(row => {
-        const matchCat  = !cat  || row["カテゴリ"] === cat;
-        const matchType = !type || row["種別"]     === type;
-        const matchKey  = !keyword ||
+        const matchCat = !cat || row["カテゴリ"] === cat;
+        const matchKey = !keyword ||
           Object.values(row).some(v => v.toLowerCase().includes(keyword));
-        return matchCat && matchType && matchKey;
+        return matchCat && matchKey;
       });
 
-      render(filtered);
+      render(filtered, document.getElementById("keyword").value);
     }
-
-    function render(data) {
+    function render(data, keyword = "") {
       const container = document.getElementById("detail-table");
       document.getElementById("count").textContent = `${data.length} 件`;
 
@@ -246,21 +229,21 @@
 
       Object.entries(grouped).forEach(([cat, types]) => {
         // カテゴリ帯
+        const catId = encodeURIComponent(cat.split('\n')[0].trim());
         html += `
-          <tr class="cat-row">
+          <tr class="cat-row" id="${catId}">
             <td colspan="4">📂 ${cat}</td>
           </tr>
         `;
 
         Object.entries(types).forEach(([type, rows]) => {
-
           rows.forEach(row => {
             html += `
               <tr>
                 <td><span class="step-id">${row["ステップID"] || ""}</span></td>
-                <td><strong>${row["ステップ名"] || ""}</strong></td>
-                <td>${(row["内容"] || "").replace(/\n/g, "<br>")}</td>
-                <td class="caution">${(row["注意点"] || "").replace(/\n/g, "<br>")}</td>
+                <td><strong>${highlightText(row["ステップ名"] || "", keyword)}</strong></td>
+                <td>${highlightText((row["内容"] || "").replace(/\n/g, "<br>"), keyword)}</td>
+                <td class="caution">${convertLinks(highlightText(row["注意点"] || "", keyword))}</td>
               </tr>
             `;
           });

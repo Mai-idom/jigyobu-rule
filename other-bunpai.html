@@ -103,7 +103,7 @@
       render(filtered);
     }
 
-    function render(data) {
+    function render(data, keyword = "") {
       const container = document.getElementById("main-table");
       document.getElementById("count").textContent = `${data.length} 件`;
 

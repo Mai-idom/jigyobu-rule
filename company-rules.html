@@ -213,7 +213,7 @@
         sel.appendChild(opt);
       });
 
-      render(allData);
+      render(allData, "");
 
       document.getElementById("cat-filter").addEventListener("change", filter);
       document.getElementById("keyword").addEventListener("input", filter);
@@ -228,10 +228,10 @@
           Object.values(row).some(v => v.toLowerCase().includes(keyword));
         return matchCat && matchKey;
       });
-      render(filtered);
+      render(filtered, document.getElementById("keyword").value);
     }
 
-    function render(data) {
+    function render(data, keyword = "") {
       const container = document.getElementById("cal-table");
       document.getElementById("count").textContent = `${data.length} 件`;
 
@@ -292,9 +292,9 @@
 
           html += `
             <tr>
-              <td><strong>${row["項目名"] || ""}</strong></td>
-              <td>${(row["内容"] || "").replace(/\n/g, "<br>")}</td>
-              <td class="caution">${(row["注意点"] || "").replace(/\n/g, "<br>")}</td>
+              <td><strong>${highlightText(row["項目名"] || "", keyword)}</strong></td>
+              <td>${highlightText((row["内容"] || "").replace(/\n/g, "<br>"), keyword)}</td>
+              <td class="caution">${convertLinks(highlightText(row["注意点"] || "", keyword))}</td>
               <td>${refCell}</td>
               <td>${imgCell}</td>
             </tr>
