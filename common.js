@@ -34,6 +34,7 @@ function convertLinks(text) {
   if (!text) return "";
 
   const pageMap = {
+    "定義":       "definition.html",
     "LINE":       "LINE.html",
     "日次":       "daily.html",
     "週次":       "weekly.html",
