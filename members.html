@@ -291,14 +291,14 @@
           }
 
           html += `
-          <tr>
-           <td><strong>${highlightText(row["項目名"] || "", keyword)}</strong></td>
-           <td>${highlightText((row["内容"] || "").replace(/\n/g, "<br>"), keyword)}</td>
-           <td class="caution">${convertLinks(highlightText(row["注意点"] || "", keyword))}</td>
-           <td>${refCell}</td>
-           <td>${imgCell}</td>
-         </tr>
-        `;
+  <tr>
+    <td><strong>${highlightText((row["項目名"] || "").replace(/\n/g, "<br>"), keyword)}</strong></td>
+    <td>${highlightText((row["内容"] || "").replace(/\n/g, "<br>"), keyword)}</td>
+    <td class="caution">${convertLinks(highlightText(row["注意点"] || "", keyword))}</td>
+    <td>${refCell}</td>
+    <td>${imgCell}</td>
+  </tr>
+`;
         });
       });
 
