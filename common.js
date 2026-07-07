@@ -44,6 +44,7 @@ function convertLinks(text) {
     "メール":     "mail.html",
     "メンバーズ": "members.html",
     "全社ルール": "company-rules.html",
+    "アプリ": "app.html",
   };
 
   text = text.replace(
